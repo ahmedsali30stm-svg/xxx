@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etlaala Voucher Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',Arial,sans-serif;font-size:13px;background:#f0f0f0;color:#111;display:grid;grid-template-columns:380px 1fr;min-height:100vh;}
+body.ar{direction:rtl;}
+.sidebar{background:#0f1923;color:#eee;height:100vh;overflow-y:auto;position:sticky;top:0;display:flex;flex-direction:column;}
+.sb-head{padding:14px 16px 12px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
+.sb-logo{width:44px;height:44px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;padding:3px;}
+.sb-logo img{width:100%;height:100%;object-fit:contain;}
+.sb-title{font-size:14px;font-weight:700;color:#fff;}
+.sb-sub{font-size:10px;color:#c9a96e;margin-top:1px;}
+.lang-switch{margin-left:auto;display:flex;gap:3px;}
+body.ar .lang-switch{margin-left:0;margin-right:auto;}
+.lang-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:4px;color:#aaa;font-family:'Cairo',Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 9px;cursor:pointer;}
+.lang-btn.active{background:#c9a96e;border-color:#c9a96e;color:#0f1923;}
+.ref-top{background:rgba(201,169,110,0.1);border-bottom:1px solid rgba(201,169,110,0.2);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;}
+.ref-top-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#c9a96e;font-weight:700;}
+.ref-top-val{font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;}
+.sb-body{padding:10px 14px;flex:1;overflow-y:auto;}
+.sec{margin-bottom:10px;}
+.sec-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#c9a96e;font-weight:700;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(201,169,110,0.2);}
+.field{margin-bottom:5px;}
+.field label{display:block;font-size:10px;color:#8899aa;margin-bottom:2px;}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#eee;font-family:'Cairo',Arial,sans-serif;font-size:12px;padding:6px 9px;outline:none;transition:border-color 0.2s;resize:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#c9a96e;}
+.field input::placeholder,.field textarea::placeholder{color:#445;}
+.field select option{background:#0f1923;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.img-upload{width:100%;background:rgba(255,255,255,0.05);border:1px dashed rgba(201,169,110,0.3);border-radius:6px;padding:10px;text-align:center;cursor:pointer;position:relative;overflow:hidden;}
+.img-upload:hover{border-color:#c9a96e;}
+.img-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-upload-icon{font-size:18px;color:#c9a96e;margin-bottom:3px;}
+.img-upload-text{font-size:10px;color:#8899aa;}
+.img-preview-sb{width:100%;max-height:80px;object-fit:cover;border-radius:4px;display:none;margin-bottom:3px;}
+.guest-row{display:flex;gap:5px;align-items:center;margin-bottom:5px;}
+.guest-row input{flex:1;}
+.guest-del{background:rgba(220,50,50,0.12);border:1px solid rgba(220,50,50,0.2);border-radius:4px;color:#f87171;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.add-btn{width:100%;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:#8899aa;font-family:'Cairo',Arial,sans-serif;font-size:10px;padding:5px;cursor:pointer;margin-top:3px;}
+.add-btn:hover{background:rgba(255,255,255,0.08);color:#ccc;}
+.sb-foot{padding:8px 14px 14px;}
+.gen-btn{width:100%;background:linear-gradient(135deg,#c9a96e,#e8c87a);border:none;border-radius:6px;color:#0f1923;font-family:'Cairo',Arial,sans-serif;font-size:13px;font-weight:700;padding:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.gen-btn:hover{filter:brightness(1.08);}
+.preview{padding:24px;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.preview-bar{width:100%;max-width:760px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.preview-bar-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;font-weight:700;}
+.print-btn{background:#0f1923;border:none;border-radius:5px;color:#fff;font-family:'Cairo',Arial,sans-serif;font-size:12px;padding:7px 14px;cursor:pointer;}
+.ph{width:100%;max-width:760px;text-align:center;padding:70px 40px;color:#aaa;}
+.ph-icon{font-size:36px;margin-bottom:12px;color:#ccc;}
+.ph h3{font-size:16px;font-weight:normal;color:#999;margin-bottom:4px;}
+.ph p{font-size:11px;color:#bbb;}
+
+/* VOUCHER */
+.voucher{width:100%;max-width:760px;background:#fff;box-shadow:0 6px 30px rgba(0,0,0,0.13);display:none;font-family:'Cairo',Arial,sans-serif;color:#111;overflow:hidden;}
+.v-header{background:linear-gradient(135deg,#0a1520 0%,#152535 60%,#0f1923 100%);display:flex;align-items:stretch;}
+.v-logo-panel{background:#fff;padding:18px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:4px;}
+.v-logo-panel img{width:76px;height:76px;object-fit:contain;}
+.v-logo-label{font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:1.5px;}
+.v-header-content{padding:16px 22px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.v-company-name{font-size:20px;font-weight:900;color:#fff;}
+.v-header-meta{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.v-ref-chip{background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.35);color:#c9a96e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:14px;letter-spacing:.8px;}
+.v-confirmed-chip{background:#16a34a;color:#fff;font-size:10px;font-weight:700;padding:4px 12px;border-radius:14px;}
+.v-date-chip{font-size:10px;color:rgba(255,255,255,0.35);margin-left:auto;}
+body.ar .v-date-chip{margin-left:0;margin-right:auto;}
+.v-gold-strip{height:3px;background:linear-gradient(90deg,#6b4f0e,#c9a96e,#f0dfa0,#c9a96e,#6b4f0e);}
+.v-hotel-photo{width:100%;height:140px;object-fit:cover;display:block;}
+.v-hotel-block{padding:14px 22px 10px;border-bottom:1px solid #f0ece4;}
+.v-hotel-name-big{font-size:18px;font-weight:900;color:#0f1923;line-height:1.2;margin-bottom:5px;}
+.v-hotel-meta{display:flex;flex-direction:column;gap:2px;}
+.v-hotel-meta-line{font-size:10px;color:#777;display:flex;align-items:center;gap:5px;}
+.v-dot{color:#c9a96e;font-size:9px;flex-shrink:0;}
+.v-section{padding:10px 22px;border-bottom:1px solid #f0ece4;}
+.v-sec-mini-title{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#c9a96e;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.v-guests-flex{display:flex;flex-wrap:wrap;gap:5px;}
+.v-guest-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;background:#f7f4ef;border-radius:12px;border:1px solid #ede8df;}
+.v-gnum{width:16px;height:16px;background:#0f1923;color:#c9a96e;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.v-gname{font-size:10px;font-weight:700;color:#1a2d3f;}
+.v-dates-row{display:flex;align-items:stretch;border-bottom:1px solid #f0ece4;}
+.v-date-cell{flex:1;padding:10px 22px;}
+.v-date-cell+.v-date-cell{border-left:1px solid #f0ece4;}
+body.ar .v-date-cell+.v-date-cell{border-left:none;border-right:1px solid #f0ece4;}
+.v-nights-cell{background:#0f1923;padding:10px 18px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+.v-dc-label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:#c9a96e;font-weight:700;margin-bottom:3px;}
+.v-dc-big{font-size:15px;font-weight:900;color:#0f1923;line-height:1.1;}
+.v-dc-day{font-size:9px;color:#aaa;margin-top:1px;}
+.v-dc-time{font-size:9px;color:#c9a96e;margin-top:1px;}
+.v-nights-num{font-size:20px;font-weight:900;color:#c9a96e;line-height:1;}
+.v-nights-lbl{font-size:8px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.v-room-row{padding:8px 22px;border-bottom:1px solid #f0ece4;display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+.v-room-item{font-size:11px;color:#444;display:flex;align-items:center;gap:5px;}
+.v-oblig-flex{display:flex;flex-direction:column;gap:3px;}
+.v-oblig-item{display:flex;align-items:center;gap:7px;font-size:10px;color:#333;padding:2px 0;}
+.v-policy-box{background:#fffdf7;border-left:3px solid #c9a96e;padding:8px 12px;font-size:10px;color:#555;line-height:1.6;border-radius:0 4px 4px 0;}
+body.ar .v-policy-box{border-left:none;border-right:3px solid #c9a96e;border-radius:4px 0 0 4px;}
+.v-terms-row{padding:8px 22px;background:#fafaf8;border-top:1px solid #f0ece4;}
+.v-terms-title{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:#bbb;font-weight:700;margin-bottom:5px;}
+.v-terms-text{font-size:9px;color:#bbb;line-height:1.7;}
+.v-footer{background:linear-gradient(135deg,#0a1520,#152535);padding:10px 22px;display:flex;align-items:center;justify-content:space-between;}
+.v-footer-left{display:flex;align-items:center;gap:8px;}
+.v-footer-logo{width:24px;height:24px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px;display:flex;align-items:center;justify-content:center;}
+.v-footer-logo img{width:100%;height:100%;object-fit:contain;}
+.v-footer-brand{font-size:10px;color:rgba(255,255,255,0.5);}
+.v-footer-right{text-align:right;}
+body.ar .v-footer-right{text-align:left;}
+.v-footer-phone{font-size:12px;font-weight:700;color:#c9a96e;}
+.v-footer-phone-lbl{font-size:8px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+
+@media print{
+  @page{size:A4;margin:8mm;}
+  body{display:block;background:#fff;}
+  .sidebar,.preview-bar,.ph{display:none!important;}
+  .preview{padding:0;display:block;}
+  .voucher{display:block!important;width:100%;max-width:100%;box-shadow:none;}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+}
+@media(max-width:780px){
+  body{grid-template-columns:1fr;}
+  .sidebar{height:auto;position:static;}
+  .preview{padding:12px;}
+}
+</style>
+</head>
+<body id="body">
+
+<aside class="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><img id="sb-logo-img" src="" alt="E"></div>
+    <div>
+      <div class="sb-title" id="t-brand">Etlaala</div>
+      <div class="sb-sub" id="t-sub">Voucher Generator</div>
+    </div>
+    <div class="lang-switch">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btn-ar" onclick="setLang('ar')">عر</button>
+    </div>
+  </div>
+
+  <div class="ref-top">
+    <span class="ref-top-label" id="t-ref-label">Voucher Ref.</span>
+    <span class="ref-top-val" id="ref-display">ETL-2026-0001</span>
+  </div>
+
+  <div class="sb-body">
+    <div class="sec">
+      <div class="sec-label" id="t-hotel-sec">Hotel Information</div>
+      <div class="field">
+        <label id="t-photo-lbl">Hotel Photo</label>
+        <div class="img-upload">
+          <input type="file" accept="image/*" onchange="handleHotelImage(event)">
+          <img id="hotel-img-preview" class="img-preview-sb">
+          <div id="upload-placeholder">
+            <div class="img-upload-icon">&#128247;</div>
+            <div class="img-upload-text" id="t-photo-hint">Click to upload hotel photo</div>
+          </div>
+        </div>
+      </div>
+      <div class="field"><label id="t-hotel-name-lbl">Hotel Name</label><input type="text" id="hotel_name" placeholder="e.g. Sheraton Grand Cairo"></div>
+      <div class="field-row">
+        <div class="field"><label id="t-city-lbl">City</label><input type="text" id="city" placeholder="Cairo"></div>
+        <div class="field"><label id="t-country-lbl">Country</label><input type="text" id="country" placeholder="Egypt" value="Egypt"></div>
+      </div>
+      <div class="field"><label id="t-addr-lbl">Address (optional)</label><input type="text" id="address" placeholder="Street address"></div>
+      <div class="field"><label id="t-phone-lbl">Hotel Phone (optional)</label><input type="text" id="hotel_phone" placeholder="+20 2 000 0000"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label" id="t-dates-sec">Stay Dates</div>
+      <div class="field-row">
+        <div class="field"><label id="t-ci-lbl">Check-in</label><input type="date" id="checkin"></div>
+        <div class="field"><label id="t-co-lbl">Check-out</label><input type="date" id="checkout"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label" id="t-room-sec">Room Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label id="t-room-lbl">Room Type</label>
+          <select id="room_type">
+            <option>Standard Room</option><option>Deluxe Room</option><option>Superior Room</option>
+            <option>Junior Suite</option><option>Suite</option><option>Executive Suite</option>
+            <option>Presidential Suite</option><option>Twin Room</option><option>Double Room</option><option>Family Room</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="t-adults-lbl">Adults</label>
+          <select id="num_adults"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label id="t-meal-lbl">Meal Plan (optional)</label>
+        <select id="meal_plan">
+          <option value="">— None —</option><option>Room Only</option><option>Bed &amp; Breakfast</option>
+          <option>Half Board</option><option>Full Board</option><option>All Inclusive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label" id="t-guests-sec">Guests</div>
+      <div id="guests-container"></div>
+      <button class="add-btn" id="add-guest-btn" onclick="addGuest()">+ Add Guest</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label" id="t-oblig-sec">Obligations / Notes</div>
+      <div id="oblig-container"></div>
+      <button class="add-btn" id="add-oblig-btn" onclick="addOblig()">+ Add Obligation</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label" id="t-policy-sec">Cancellation Policy</div>
+      <div class="field"><textarea id="cancel_policy" rows="2"></textarea></div>
+    </div>
+  </div>
+
+  <div class="sb-foot">
+    <button class="gen-btn" onclick="generateVoucher()">&#9654; <span id="t-gen-btn">Generate Voucher</span></button>
+  </div>
+</aside>
+
+<main class="preview">
+  <div class="preview-bar" id="preview-bar" style="display:none;">
+    <span class="preview-bar-label" id="t-preview-lbl">Preview</span>
+    <button class="print-btn" onclick="window.print()" id="t-print-btn">&#128438; Print / Save PDF</button>
+  </div>
+  <div class="ph" id="placeholder">
+    <div class="ph-icon">&#128196;</div>
+    <h3 id="t-ph-title">Your voucher will appear here</h3>
+    <p id="t-ph-sub">Fill in the form and click Generate Voucher</p>
+  </div>
+  <div class="voucher" id="voucher"></div>
+</main>
+
+<script>
+var LOGO="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='10' fill='%23c9a96e'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Georgia' font-weight='bold'%3EE%3C/text%3E%3C/svg%3E";
+var currentLang='en', hotelImageData=null, voucherCounter=1;
+
+var T={
+  en:{
+    brand:'Etlaala',sub:'Voucher Generator',refLabel:'Voucher Ref.',
+    hotelSec:'Hotel Information',photoLbl:'Hotel Photo',photoHint:'Click to upload hotel photo',
+    hotelNameLbl:'Hotel Name',cityLbl:'City',countryLbl:'Country',
+    addrLbl:'Address (optional)',phoneLbl:'Hotel Phone (optional)',
+    datesSec:'Stay Dates',ciLbl:'Check-in',coLbl:'Check-out',
+    roomSec:'Room Details',roomLbl:'Room Type',adultsLbl:'Adults',mealLbl:'Meal Plan (optional)',
+    guestsSec:'Guests',addGuest:'+ Add Guest',obligSec:'Obligations / Notes',addOblig:'+ Add Obligation',
+    policySec:'Cancellation Policy',genBtn:'Generate Voucher',
+    previewLbl:'Preview',printBtn:'Print / Save PDF',
+    phTitle:'Your voucher will appear here',phSub:'Fill in the form and click Generate Voucher',
+    guestPh:'Full Name',obligPh:'e.g. Breakfast included daily',
+    policyPh:'Non-refundable. Please present this voucher upon check-in.',
+    rooms:['Standard Room','Deluxe Room','Superior Room','Junior Suite','Suite','Executive Suite','Presidential Suite','Twin Room','Double Room','Family Room'],
+    meals:['— None —','Room Only','Bed & Breakfast','Half Board','Full Board','All Inclusive'],
+    vGuests:'Guests',vCheckIn:'Check-in',vCheckOut:'Check-out',vNight:'Night',vNights:'Nights',
+    vOblig:'Obligations & Services',vPolicy:'Cancellation Policy',vConfirmed:'Confirmed',
+    vFrom:'Check-in from 14:00',vUntil:'Check-out by 12:00',
+    vCustomerService:'Customer Service 24/7',vFooter:'Etlaala Travel & Tourism',
+    vRoomType:'Room Type',vAdults:'Adults',vMealPlan:'Meal Plan',vAdultsLabel:'adult(s)',
+    vTermsTitle:'Terms & Conditions',
+    vTerms:'1. This voucher is valid only for the specified dates and guest names listed above.|2. Please present this voucher at check-in.|3. Any changes or cancellations are subject to the hotel\'s policy.|4. Etlaala Travel & Tourism acts as an agent and is not liable for hotel service quality.|5. In case of no-show, the booking is considered cancelled without refund.|6. All disputes are subject to applicable local regulations.',
+    vGenerated:'Generated on'
+  },
+  ar:{
+    brand:'اطلالة',sub:'مولّد الفواتشر',refLabel:'رقم الفاوتشر',
+    hotelSec:'بيانات الفندق',photoLbl:'صورة الفندق',photoHint:'اضغط لرفع صورة الفندق',
+    hotelNameLbl:'اسم الفندق',cityLbl:'المدينة',countryLbl:'الدولة',
+    addrLbl:'العنوان (اختياري)',phoneLbl:'هاتف الفندق (اختياري)',
+    datesSec:'مواعيد الإقامة',ciLbl:'تاريخ الوصول',coLbl:'تاريخ المغادرة',
+    roomSec:'تفاصيل الغرفة',roomLbl:'نوع الغرفة',adultsLbl:'عدد البالغين',mealLbl:'نظام الوجبات (اختياري)',
+    guestsSec:'النزلاء',addGuest:'+ إضافة نزيل',obligSec:'الالتزامات / ملاحظات',addOblig:'+ إضافة التزام',
+    policySec:'سياسة الإلغاء',genBtn:'إنشاء الفاوتشر',
+    previewLbl:'معاينة',printBtn:'طباعة / حفظ PDF',
+    phTitle:'الفاوتشر سيظهر هنا',phSub:'املأ البيانات واضغط إنشاء الفاوتشر',
+    guestPh:'الاسم الكامل',obligPh:'مثال: إفطار يومي مشمول',
+    policyPh:'غير قابل للاسترداد. يرجى تقديم هذا الفاوتشر عند تسجيل الوصول.',
+    rooms:['غرفة قياسية','غرفة ديلوكس','غرفة سوبيريور','جونيور سويت','سويت','سويت إكزيكيوتف','سويت رئاسي','غرفة توين','غرفة دبل','غرفة عائلية'],
+    meals:['— بدون —','غرفة فقط','غرفة مع إفطار','نصف إقامة','إقامة كاملة','كل شيء مشمول'],
+    vGuests:'النزلاء',vCheckIn:'تاريخ الوصول',vCheckOut:'تاريخ المغادرة',vNight:'ليلة',vNights:'ليالٍ',
+    vOblig:'الالتزامات والخدمات',vPolicy:'سياسة الإلغاء',vConfirmed:'مؤكد',
+    vFrom:'تسجيل الوصول من 14:00',vUntil:'تسجيل المغادرة حتى 12:00',
+    vCustomerService:'خدمة العملاء 24 ساعة',vFooter:'اطلالة للسياحة والسفر',
+    vRoomType:'نوع الغرفة',vAdults:'البالغون',vMealPlan:'نظام الوجبات',vAdultsLabel:'بالغ',
+    vTermsTitle:'الشروط والأحكام',
+    vTerms:'1. هذا الفاوتشر صالح فقط للتواريخ وأسماء النزلاء المذكورة أعلاه.|2. يرجى تقديم هذا الفاوتشر عند تسجيل الوصول.|3. أي تغييرات أو إلغاءات تخضع لسياسة الفندق.|4. اطلالة للسياحة والسفر تعمل كوكيل وليست مسؤولة عن جودة خدمات الفندق.|5. في حالة عدم الحضور يعتبر الحجز ملغياً دون استرداد.|6. جميع النزاعات تخضع للأنظمة المحلية المعمول بها.',
+    vGenerated:'صدر بتاريخ'
+  }
+};
+
+function t(k){return T[currentLang][k]||T.en[k]||'';}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('sb-logo-img').src=LOGO;
+  var ci=new Date(); ci.setDate(ci.getDate()+1);
+  var co=new Date(); co.setDate(co.getDate()+4);
+  document.getElementById('checkin').value=ci.toISOString().split('T')[0];
+  document.getElementById('checkout').value=co.toISOString().split('T')[0];
+  document.getElementById('ref-display').textContent='ETL-'+new Date().getFullYear()+'-0001';
+  addGuest(); addOblig();
+  applyLang();
+});
+
+function setLang(l){
+  currentLang=l;
+  document.getElementById('body').className=l==='ar'?'ar':'';
+  document.getElementById('btn-en').className='lang-btn'+(l==='en'?' active':'');
+  document.getElementById('btn-ar').className='lang-btn'+(l==='ar'?' active':'');
+  applyLang();
+}
+
+function applyLang(){
+  var m={
+    't-brand':'brand','t-sub':'sub','t-ref-label':'refLabel',
+    't-hotel-sec':'hotelSec','t-photo-lbl':'photoLbl','t-photo-hint':'photoHint',
+    't-hotel-name-lbl':'hotelNameLbl','t-city-lbl':'cityLbl','t-country-lbl':'countryLbl',
+    't-addr-lbl':'addrLbl','t-phone-lbl':'phoneLbl',
+    't-dates-sec':'datesSec','t-ci-lbl':'ciLbl','t-co-lbl':'coLbl',
+    't-room-sec':'roomSec','t-room-lbl':'roomLbl','t-adults-lbl':'adultsLbl','t-meal-lbl':'mealLbl',
+    't-guests-sec':'guestsSec','add-guest-btn':'addGuest',
+    't-oblig-sec':'obligSec','add-oblig-btn':'addOblig',
+    't-policy-sec':'policySec','t-gen-btn':'genBtn',
+    't-preview-lbl':'previewLbl','t-ph-title':'phTitle','t-ph-sub':'phSub'
+  };
+  Object.keys(m).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t(m[id]);});
+  var pb=document.getElementById('t-print-btn'); if(pb) pb.textContent='&#128438; '+t('printBtn');
+  var rs=t('rooms'),sel=document.getElementById('room_type');
+  for(var i=0;i<sel.options.length;i++) sel.options[i].text=rs[i]||sel.options[i].text;
+  var ms=t('meals'),msel=document.getElementById('meal_plan');
+  for(var j=0;j<msel.options.length;j++) msel.options[j].text=ms[j]||msel.options[j].text;
+  document.getElementById('hotel_name').placeholder=currentLang==='ar'?'مثال: شيراتون القاهرة':'e.g. Sheraton Grand Cairo';
+  document.getElementById('city').placeholder=currentLang==='ar'?'القاهرة':'Cairo';
+  document.getElementById('country').placeholder=currentLang==='ar'?'مصر':'Egypt';
+  document.getElementById('address').placeholder=currentLang==='ar'?'عنوان الشارع':'Street address';
+  document.getElementById('cancel_policy').placeholder=t('policyPh');
+  document.querySelectorAll('#guests-container input').forEach(function(i){i.placeholder=t('guestPh');});
+  document.querySelectorAll('#oblig-container input').forEach(function(i){i.placeholder=t('obligPh');});
+}
+
+function handleHotelImage(e){
+  var f=e.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    hotelImageData=ev.target.result;
+    var p=document.getElementById('hotel-img-preview');
+    p.src=hotelImageData; p.style.display='block';
+    document.getElementById('upload-placeholder').style.display='none';
+  };
+  r.readAsDataURL(f);
+}
+
+function addGuest(){
+  var c=document.getElementById('guests-container');
+  if(c.querySelectorAll('.guest-row').length>=12) return;
+  var d=document.createElement('div'); d.className='guest-row';
+  d.innerHTML='<input type="text" placeholder="'+t('guestPh')+'"><button class="guest-del" onclick="this.parentElement.remove()">&#10005;</button>';
+  c.appendChild(d);
+}
+
+function addOblig(){
+  var c=document.getElementById('oblig-container');
+  if(c.querySelectorAll('.guest-row').length>=10) return;
+  var d=document.createElement('div'); d.className='guest-row';
+  d.innerHTML='<input type="text" placeholder="'+t('obligPh')+'"><button class="guest-del" onclick="this.parentElement.remove()">&#10005;</button>';
+  c.appendChild(d);
+}
+
+function fmtDate(s){if(!s) return '—'; var d=new Date(s+'T12:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtDay(s){if(!s) return ''; return new Date(s+'T12:00:00').toLocaleDateString(currentLang==='ar'?'ar-EG':'en-GB',{weekday:'long'});}
+function nights(a,b){if(!a||!b) return 0; return Math.max(0,Math.round((new Date(b)-new Date(a))/86400000));}
+
+function generateVoucher(){
+  var hotel  =document.getElementById('hotel_name').value.trim()||(currentLang==='ar'?'اسم الفندق':'Hotel Name');
+  var city   =document.getElementById('city').value.trim();
+  var country=document.getElementById('country').value.trim();
+  var address=document.getElementById('address').value.trim();
+  var phone  =document.getElementById('hotel_phone').value.trim();
+  var room   =document.getElementById('room_type').value;
+  var adults =document.getElementById('num_adults').value;
+  var meal   =document.getElementById('meal_plan').value;
+  var checkin=document.getElementById('checkin').value;
+  var checkout=document.getElementById('checkout').value;
+  var policy =document.getElementById('cancel_policy').value.trim();
+  var n      =nights(checkin,checkout);
+  var y      =new Date().getFullYear();
+  var ref    ='ETL-'+y+'-'+String(voucherCounter).padStart(4,'0');
+  document.getElementById('ref-display').textContent=ref;
+  voucherCounter++;
+  var today  =new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  var loc    =[city,country].filter(Boolean).join(', ');
+  var dir    =currentLang==='ar'?'rtl':'ltr';
+  var DOT    ='<span class="v-dot">&#9679;</span>';
+  var CHK    ='<span class="v-dot">&#10003;</span>';
+
+  var guests=Array.from(document.querySelectorAll('#guests-container .guest-row input')).map(function(i){return i.value.trim();}).filter(Boolean);
+  if(!guests.length) guests.push(currentLang==='ar'?'النزيل':'Guest');
+  var obligs=Array.from(document.querySelectorAll('#oblig-container .guest-row input')).map(function(i){return i.value.trim();}).filter(Boolean);
+
+  var html='<div dir="'+dir+'">';
+
+  // HEADER
+  html+='<div class="v-header">'
+    +'<div class="v-logo-panel"><img src="'+LOGO+'" alt="E"><div class="v-logo-label">ETLAALA</div></div>'
+    +'<div class="v-header-content">'
+    +'<div class="v-company-name">'+t('vFooter')+'</div>'
+    +'<div class="v-header-meta">'
+    +'<div class="v-ref-chip">'+ref+'</div>'
+    +'<div class="v-confirmed-chip">&#10003; '+t('vConfirmed')+'</div>'
+    +'<div class="v-date-chip">'+t('vGenerated')+' '+today+'</div>'
+    +'</div></div></div>'
+    +'<div class="v-gold-strip"></div>';
+
+  // PHOTO
+  if(hotelImageData) html+='<img class="v-hotel-photo" src="'+hotelImageData+'" alt="Hotel">';
+
+  // HOTEL BLOCK
+  html+='<div class="v-hotel-block">'
+    +'<div class="v-hotel-name-big">'+hotel+'</div>'
+    +'<div class="v-hotel-meta">'
+    +(loc    ?'<div class="v-hotel-meta-line">'+DOT+loc+'</div>':'')
+    +(address?'<div class="v-hotel-meta-line">'+DOT+address+'</div>':'')
+    +(phone  ?'<div class="v-hotel-meta-line">'+DOT+phone+'</div>':'')
+    +'</div></div>';
+
+  // 1. GUESTS
+  html+='<div class="v-section"><div class="v-sec-mini-title">'+DOT+t('vGuests')+'</div>'
+    +'<div class="v-guests-flex">'
+    +guests.map(function(g,i){return '<div class="v-guest-chip"><div class="v-gnum">'+(i+1)+'</div><div class="v-gname">'+g+'</div></div>';}).join('')
+    +'</div></div>';
+
+  // 2. DATES
+  html+='<div class="v-dates-row">'
+    +'<div class="v-date-cell"><div class="v-dc-label">'+t('vCheckIn')+'</div><div class="v-dc-big">'+fmtDate(checkin)+'</div><div class="v-dc-day">'+fmtDay(checkin)+'</div><div class="v-dc-time">'+t('vFrom')+'</div></div>'
+    +'<div class="v-nights-cell"><div class="v-nights-num">'+n+'</div><div class="v-nights-lbl">'+t(n===1?'vNight':'vNights')+'</div></div>'
+    +'<div class="v-date-cell"><div class="v-dc-label">'+t('vCheckOut')+'</div><div class="v-dc-big">'+fmtDate(checkout)+'</div><div class="v-dc-day">'+fmtDay(checkout)+'</div><div class="v-dc-time">'+t('vUntil')+'</div></div>'
+    +'</div>';
+
+  // 3. ROOM & MEAL under dates
+  html+='<div class="v-room-row">'
+    +'<div class="v-room-item">'+DOT+'<strong>'+t('vRoomType')+':</strong> '+room+'</div>'
+    +'<div class="v-room-item">'+DOT+'<strong>'+t('vAdults')+':</strong> '+adults+' '+t('vAdultsLabel')+'</div>'
+    +(meal?'<div class="v-room-item">'+DOT+'<strong>'+t('vMealPlan')+':</strong> '+meal+'</div>':'')
+    +'</div>';
+
+  // 4. OBLIGATIONS
+  if(obligs.length){
+    html+='<div class="v-section"><div class="v-sec-mini-title">'+DOT+t('vOblig')+'</div>'
+      +'<div class="v-oblig-flex">'
+      +obligs.map(function(o){return '<div class="v-oblig-item">'+CHK+o+'</div>';}).join('')
+      +'</div></div>';
+  }
+
+  // POLICY
+  if(policy){
+    html+='<div class="v-section"><div class="v-sec-mini-title">'+DOT+t('vPolicy')+'</div>'
+      +'<div class="v-policy-box">'+policy+'</div></div>';
+  }
+
+  // TERMS
+  var terms=t('vTerms').split('|');
+  html+='<div class="v-terms-row"><div class="v-terms-title">'+t('vTermsTitle')+'</div>'
+    +'<div class="v-terms-text">'+terms.join('<br>')+'</div></div>';
+
+  // FOOTER
+  html+='<div class="v-footer">'
+    +'<div class="v-footer-left">'
+    +'<div class="v-footer-logo"><img src="'+LOGO+'" alt="E"></div>'
+    +'<div class="v-footer-brand">'+t('vFooter')+' &copy; '+y+'</div>'
+    +'</div>'
+    +'<div class="v-footer-right">'
+    +'<div class="v-footer-phone">920029967</div>'
+    +'<div class="v-footer-phone-lbl">'+t('vCustomerService')+'</div>'
+    +'</div></div>';
+
+  html+='</div>';
+
+  var v=document.getElementById('voucher');
+  v.innerHTML=html; v.style.display='block';
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('preview-bar').style.display='flex';
+  v.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
